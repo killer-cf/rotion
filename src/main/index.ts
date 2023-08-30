@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { createFileRoute, createURLRoute } from 'electron-router-dom'
 import icon from '../../resources/icon.png'
 
 function createWindow(): void {
@@ -31,10 +32,21 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
+  const devServerURL = createURLRoute(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    process.env.ELECTRON_RENDERER_URL!,
+    'main',
+  )
+
+  const fileRoute = createFileRoute(
+    join(__dirname, '../renderer/index.html'),
+    'main',
+  )
+
   if (is.dev && process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
+    mainWindow.loadURL(devServerURL)
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(...fileRoute)
   }
 }
 
